@@ -1,0 +1,6 @@
+/.vs
+/packages
+/BookStore.V1.Test/obj
+/BookStore.V1.Test/bin
+/BookStore/obj
+/BookStore/bin
