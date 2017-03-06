@@ -13,8 +13,8 @@ namespace BookStore.Repository
         {
             return
                 await connection.QueryFirstOrDefaultAsync<BookInventory>(
-                    "SELECT * FROM [BookInventory] WHERE [BookId]=@ID",
-                    new {ID = id});
+                    "SELECT * FROM [BookInventory] WHERE [BookId]=@Id",
+                    new {Id = id});
         }
 
         public async Task<int> Add(BookInventory newItem)
@@ -26,8 +26,8 @@ namespace BookStore.Repository
 
         public async Task<int> AddInventory(long bookId, int inventory)
         {
-            return await connection.ExecuteAsync("UPDATE [BookInventory] SET [Inventory]=[Inventory]+@Inventory",
-                new {Inventory = inventory});
+            return await connection.ExecuteAsync("UPDATE [BookInventory] SET [Inventory]=[Inventory]+@Inventory WHERE [BookId]=@Id",
+                new {Inventory = inventory, Id = bookId });
         }
 
         protected override SqlConnection GetConnection()
