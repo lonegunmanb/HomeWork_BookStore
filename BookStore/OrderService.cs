@@ -9,9 +9,10 @@ namespace BookStore
 {
     public class OrderService
     {
-        private static int _id = 0;
-        public async Task PlaceNewOrder(long userId, long bookId, int bookAmount)
+        private static long _id = 0;
+        public async Task<long> PlaceNewOrder(long userId, long bookId, int bookAmount)
         {
+            long orderId = 0;
             using (var transactionScope = new TransactionScope())
             {
                 using (var bookRepository = RepositoryContainer.GetRepository<IBookRepository>())
@@ -66,19 +67,18 @@ namespace BookStore
 
                                 using (var orderRepository = RepositoryContainer.GetRepository<IOrderRepository>())
                                 {
-
+                                    orderId = Interlocked.Increment(ref _id);
                                     if (
                                         await orderRepository.Add(new Order
                                         {
                                             Amount = bookAmount,
                                             BookId = bookId,
                                             UserId = userId,
-                                            Id = Interlocked.Increment(ref _id)
+                                            Id = orderId
                                         }) != 1)
                                     {
                                         throw new DbOperationFailedException();
                                     }
-                                    
                                 }
                             }
                         }
@@ -87,6 +87,7 @@ namespace BookStore
 
                 transactionScope.Complete();
             }
+            return orderId;
         }
     }
 }
