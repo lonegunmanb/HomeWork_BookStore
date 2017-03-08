@@ -49,6 +49,7 @@ namespace BookStore
                                 if (await creditCardChargeRepository.Add(new CreditCardCharge
                                 {
                                     Amount = total,
+                                    UserId = userId,
                                     Id = Interlocked.Increment(ref _id)
                                 }) != 1)
                                 {
