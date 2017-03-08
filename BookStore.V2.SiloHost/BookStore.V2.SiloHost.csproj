@@ -160,6 +160,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="CreateSql.sql" />
     <Content Include="OrleansHost.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
