@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace BookStore.Exception
 {
+    [Serializable]
     public class DbOperationFailedException : System.Exception
     {
         public DbOperationFailedException() { }
