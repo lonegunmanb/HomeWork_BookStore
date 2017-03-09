@@ -40,8 +40,6 @@ namespace BookStore.V2.Grain.Grain
                         throw new DbOperationFailedException();
                     }
 
-                    throw new System.Exception();
-
                     var newApplication = new BookInventoryApplication
                     {
                         OrderId = orderId.Value,

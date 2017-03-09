@@ -38,9 +38,8 @@ namespace BookStore.V2.Grain.Grain
             var userCreditReminder = await ChargeUserCredit(userId, orderId, totalPrice);
             var creditCardReminder = await ChargeCreditCard(userId, orderId, totalPrice);
             var bookInventoryReminder = await AcquireBookInventory(bookId, amount, orderId);
-
             await ConfirmOrderFO(orderId);
-
+            
             await UnregisterAllRollbackReminder(orderReminder, userCreditReminder, creditCardReminder, bookInventoryReminder);
             Console.WriteLine("Done");
         }
@@ -146,13 +145,18 @@ namespace BookStore.V2.Grain.Grain
 
         private async Task RollbackOrder()
         {
-            Console.WriteLine("Rollback Order");
+            Console.WriteLine("Rollbacking Order");
             var orderId = this.GetPrimaryKeyLong();
             using (var connection = GetConnection())
             {
-                await connection.ExecuteAsync(
+                var result = await connection.ExecuteAsync(
                     "UPDATE [Order] SET [Status]=@Dest WHERE [Id]=@Id AND [Status]=@Expected",
                     new {Id = orderId, Expected = (int) OrderStatus.Created, Dest = (int) OrderStatus.Canceled});
+
+                if (result != 1)
+                {
+                    Console.WriteLine("Cancel Rollback order");
+                }
             }
 
             await UnregisterReminder(await GetReminder(GetCreateOrderReminderName()));
@@ -173,6 +177,10 @@ namespace BookStore.V2.Grain.Grain
                 var userGrain = GrainFactory.GetGrain<IUser>(userId);
                 await userGrain.RollbackCharge(orderId.AsImmutable());
             }
+            else
+            {
+                Console.WriteLine("Cancel rollback user");
+            }
             await UnregisterReminder(await GetReminder(GetChargeUserCreditReminderName()));
         }
 
@@ -183,6 +191,10 @@ namespace BookStore.V2.Grain.Grain
                 var orderId = this.GetPrimaryKeyLong();
                 var creditCardPos = GrainFactory.GetGrain<ICreditCardPos>(orderId);
                 await creditCardPos.RollbackCharge();
+            }
+            else
+            {
+                Console.WriteLine("Cancel rollback creditcard");
             }
             await UnregisterReminder(await GetReminder(GetChargeCreditCardReminderName()));
         }
@@ -200,6 +212,10 @@ namespace BookStore.V2.Grain.Grain
                 }
                 var bookInventoryManager = GrainFactory.GetGrain<IBookInventoryManager>(bookId);
                 await bookInventoryManager.RollbackApplication(orderId.AsImmutable());
+            }
+            else
+            {
+                Console.WriteLine("Cancel rollback book inventory");
             }
             await UnregisterReminder(await GetReminder(GetAcquireBookInventoryReminderName()));
         }
